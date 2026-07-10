@@ -1,0 +1,227 @@
+import React, { useState, useEffect } from 'react';
+import { HelpCircle, Home, BookOpen, AlertCircle } from 'lucide-react';
+
+const QUESTIONS_P1 = [
+  { id: 1, text: "_____(1) accountant checked the monthly report, _____(2) several numbers were missing.", hint: "Choose the correct article and conjunction.", options: ["A / because", "The / and", "An / so", "An / but"], correct: "An / but", explanation: "Correct: 'An' is used before 'accountant' because it begins with a vowel sound. 'But' shows contrast between checking the report and finding errors." },
+  { id: 2, text: "_____(1) manager approved the budget, _____(2) the finance team started the project immediately.", hint: "Choose the correct article and conjunction.", options: ["A / because", "The / although", "The / so", "An / but"], correct: "The / so", explanation: "Correct: 'The manager' refers to a specific manager. 'So' shows the result of the approval." },
+  { id: 3, text: "_____(1) airport was crowded, _____(2) many flights were delayed.", hint: "Choose the correct article and conjunction.", options: ["The / so", "A / but", "An / because", "- / although"], correct: "The / so", explanation: "Correct: 'The airport' refers to a specific airport. 'So' introduces the result." },
+  { id: 4, text: "_____(1) employee finished the report early, _____(2) the manager asked for a few changes.", hint: "Choose the correct article and conjunction.", options: ["The / because", "The / but", "A / so", "- / and"], correct: "The / but", explanation: "Correct: 'An employee' is correct because 'employee' begins with a vowel sound. 'But' shows contrast." },
+  { id: 5, text: "_____(1) meeting started late _____(2) the director arrived after everyone else.", hint: "Choose the correct article and conjunction.", options: ["The / because", "A / but", "An / although", "- / so"], correct: "The / because", explanation: "Correct: 'The meeting' refers to a specific meeting. 'Because' explains the reason." },
+  { id: 6, text: "_____(1) engineer repaired the machine, _____(2) it worked perfectly again.", hint: "Choose the correct article and conjunction.", options: ["An / so", "The / although", "A / because", "An / but"], correct: "An / so", explanation: "Correct: 'Engineer' begins with a vowel sound, so 'an' is required. 'So' expresses the result." },
+  { id: 7, text: "_____(1) customer forgot the receipt, _____(2) the cashier could not process the return.", hint: "Choose the correct article and conjunction.", options: ["The / and", "A / but", "An / because", "The / so"], correct: "The / so", explanation: "Correct: 'The customer' refers to a specific customer. 'So' shows the consequence." },
+  { id: 8, text: "_____(1) university opened a new library, _____(2) students visited it on the first day.", hint: "Remember the pronunciation of 'university.'", options: ["The / but", "An / because", "A / and", "- / although"], correct: "A / and", explanation: "Correct: 'University' begins with the /y/ sound, so 'a' is correct. 'And' joins two related actions." },
+  { id: 9, text: "_____(1) invoice contained an error, _____(2) the accountant corrected it before sending it.", hint: "Choose the correct article and conjunction.", options: ["A / because", "The / but", "An / although", "The / so"], correct: "The / so", explanation: "Correct: 'The invoice' refers to a specific invoice. 'So' introduces the result." },
+  { id: 10, text: "_____(1) sun disappeared behind the clouds, _____(2) it became much cooler.", hint: "Think about unique things in nature.", options: ["The / so", "A / because", "An / but", "- / although"], correct: "The / so", explanation: "Correct: 'The sun' is unique, so the definite article is required. 'So' expresses the result." },
+  { id: 11, text: "_____(1) auditor found several mistakes, _____(2) the company corrected them quickly.", hint: "Choose the correct article and conjunction.", options: ["The / because", "A / but", "An / so", "- / although"], correct: "An / so", explanation: "Correct: 'Auditor' begins with a vowel sound, so 'an' is required. 'So' shows the result." },
+  { id: 12, text: "_____(1) family wanted to go to the beach, _____(2) it started raining.", hint: "Choose the correct article and conjunction.", options: ["The / because", "The / but", "A / and", "An / so"], correct: "The / but", explanation: "Correct: 'The family' refers to one family. 'But' introduces a contrasting event." },
+  { id: 13, text: "_____(1) accident blocked the road, _____(2) drivers had to take another route.", hint: "Choose the correct article and conjunction.", options: ["The / because", "A / although", "An / and", "The / so"], correct: "The / so", explanation: "Correct: 'The accident' refers to the specific accident being discussed. 'So' expresses the result." },
+  { id: 14, text: "_____(1) office received a new printer, _____(2) everyone could print their reports more quickly.", hint: "Choose the correct article and conjunction.", options: ["An / because", "The / but", "The / so", "A / although"], correct: "The / so", explanation: "Correct: 'The office' refers to a specific office. 'So' shows the result." },
+  { id: 15, text: "_____(1) cashier counted the money twice, _____(2) the total was correct.", hint: "Choose the correct article and conjunction.", options: ["A / because", "An / although", "The / and", "- / but"], correct: "The / and", explanation: "Correct: 'The cashier' refers to a specific cashier. 'And' joins two related actions in sequence." }
+];
+
+const QUESTIONS_P2 = [
+  { id: 1, sentence: "Although the accountant finished the report, but he forgot to attach the invoice.", hint: "Look for an unnecessary conjunction.", parts: [{ id: "a", text: "Although" }, { id: "b", text: "the accountant finished the report," }, { id: "c", text: "but" }, { id: "d", text: "he forgot to attach the invoice." }], correct: "c", explanation: "'Although' and 'but' should not be used together. Use one or the other." },
+  { id: 2, sentence: "She hired a accountant to review the company's financial records.", hint: "Check the article before the noun.", parts: [{ id: "a", text: "She hired" }, { id: "b", text: "a accountant" }, { id: "c", text: "to review" }, { id: "d", text: "the company's financial records." }], correct: "b", explanation: "The error is in part B: 'a accountant' should be 'an accountant.'" },
+  { id: 3, sentence: "The cashier counted the money twice, so because the total seemed incorrect.", hint: "Two conjunctions are used together incorrectly.", parts: [{ id: "a", text: "The cashier counted the money twice," }, { id: "b", text: "so" }, { id: "c", text: "because" }, { id: "d", text: "the total seemed incorrect." }], correct: "b", explanation: "'So' and 'because' should not be used together in the same sentence." },
+  { id: 4, sentence: "An customer asked to speak with the store manager.", hint: "Check the article.", parts: [{ id: "a", text: "An" }, { id: "b", text: "customer" }, { id: "c", text: "asked to speak" }, { id: "d", text: "with the store manager." }], correct: "a", explanation: "'Customer' begins with a consonant sound, so the sentence should say 'A customer.'" },
+  { id: 5, sentence: "The budget was approved, but however the project was delayed.", hint: "Only one contrast word is needed.", parts: [{ id: "a", text: "The budget was approved," }, { id: "b", text: "but however" }, { id: "c", text: "the project" }, { id: "d", text: "was delayed." }], correct: "b", explanation: "'But' and 'however' express the same contrast and should not be used together." },
+  { id: 6, sentence: "Because the printer was broken, so the reports were printed later.", hint: "Look for a redundant conjunction.", parts: [{ id: "a", text: "Because" }, { id: "b", text: "the printer was broken," }, { id: "c", text: "so" }, { id: "d", text: "the reports were printed later." }], correct: "c", explanation: "Use either 'Because' or 'so,' not both together." },
+  { id: 7, sentence: "He bought a umbrella before walking to work.", hint: "Check the article before a vowel sound.", parts: [{ id: "a", text: "He bought" }, { id: "b", text: "a" }, { id: "c", text: "umbrella" }, { id: "d", text: "before walking to work." }], correct: "b", explanation: "The phrase should be 'an umbrella' because 'umbrella' begins with a vowel sound." },
+  { id: 8, sentence: "The accountant submitted the report, and because the manager approved it immediately.", hint: "One conjunction is unnecessary.", parts: [{ id: "a", text: "The accountant submitted the report," }, { id: "b", text: "and" }, { id: "c", text: "because" }, { id: "d", text: "the manager approved it immediately." }], correct: "c", explanation: "'And' and 'because' do not work together in this sentence." },
+  { id: 9, sentence: "A engineer checked the machine before the factory opened.", hint: "Check the article.", parts: [{ id: "a", text: "A" }, { id: "b", text: "engineer" }, { id: "c", text: "checked the machine" }, { id: "d", text: "before the factory opened." }], correct: "a", explanation: "'Engineer' begins with a vowel sound, so it should be 'An engineer.'" },
+  { id: 10, sentence: "The weather was cold, but so everyone stayed inside.", hint: "Only one connector is needed.", parts: [{ id: "a", text: "The weather was cold," }, { id: "b", text: "but so" }, { id: "c", text: "everyone stayed" }, { id: "d", text: "inside." }], correct: "b", explanation: "'But' and 'so' should not be used together." },
+  { id: 11, sentence: "The invoice was correct, but yet the customer had another question.", hint: "Avoid double conjunctions.", parts: [{ id: "a", text: "The invoice was correct," }, { id: "b", text: "but yet" }, { id: "c", text: "yet" }, { id: "d", text: "yet." }], correct: "b", explanation: "'But' and 'yet' express the same contrast. Only one should be used." },
+  { id: 12, sentence: "The children wanted to play outside, although it started to rain.", hint: "Read the whole sentence carefully.", parts: [{ id: "a", text: "The children" }, { id: "b", text: "wanted to play outside," }, { id: "c", text: "although" }, { id: "d", text: "it started to rain." }], correct: "c", explanation: "The sentence should use 'but' to show contrast between independent clauses." },
+  { id: 13, sentence: "The customer waited because so the cashier was helping another person.", hint: "Choose the unnecessary conjunction.", parts: [{ id: "a", text: "The customer waited" }, { id: "b", text: "because so" }, { id: "c", text: "the cashier" }, { id: "d", text: "was helping another person." }], correct: "b", explanation: "Use either 'because' or 'so,' not both together." },
+  { id: 14, sentence: "An university offers several accounting courses.", hint: "Think about pronunciation.", parts: [{ id: "a", text: "An" }, { id: "b", text: "university" }, { id: "c", text: "offers several" }, { id: "d", text: "accounting courses." }], correct: "a", explanation: "'University' begins with the /y/ sound, so the correct phrase is 'A university.'" },
+  { id: 15, sentence: "An European company opened a new office in the city.", hint: "Think about pronunciation.", parts: [{ id: "a", text: "An" }, { id: "b", text: "European company" }, { id: "c", text: "opened a new office" }, { id: "d", text: "in the city." }], correct: "a", explanation: "'European' begins with the /y/ sound, so the correct phrase is 'A European company.'" }
+];
+
+export default function App() {
+  const [currentScreen, setCurrentScreen] = useState('HOME');
+  const [p1Index, setP1Index] = useState(0);
+  const [p2Index, setP2Index] = useState(0);
+  const [userAnswers, setUserAnswers] = useState({});
+  const [directionTimer, setDirectionTimer] = useState(10);
+  const [exerciseTimer, setExerciseTimer] = useState(1200); 
+  const [savedName, setSavedName] = useState(null);
+
+  useEffect(() => {
+    if (['DIRECTIONS_P1', 'DIRECTIONS_P2'].includes(currentScreen)) {
+      if (directionTimer > 0) {
+        const interval = setInterval(() => setDirectionTimer((prev) => prev - 1), 1000);
+        return () => clearInterval(interval);
+      }
+    } else {
+      setDirectionTimer(10);
+    }
+  }, [currentScreen, directionTimer]);
+
+  useEffect(() => {
+    if (['P1', 'P2'].includes(currentScreen)) {
+      const interval = setInterval(() => setExerciseTimer((prev) => (prev > 0 ? prev - 1 : 0)), 1000);
+      return () => clearInterval(interval);
+    }
+  }, [currentScreen]);
+
+  const handleNext = () => {
+    if (currentScreen === 'P1') {
+      if (p1Index < QUESTIONS_P1.length - 1) setP1Index(p1Index + 1);
+      else setCurrentScreen('DIRECTIONS_P2');
+    } else if (currentScreen === 'P2') {
+      if (p2Index < QUESTIONS_P2.length - 1) setP2Index(p2Index + 1);
+      else setCurrentScreen('RESULT');
+    }
+  };
+
+  const handleBack = () => {
+    if (currentScreen === 'P1' && p1Index > 0) setP1Index(p1Index - 1);
+    else if (currentScreen === 'P2' && p2Index > 0) setP2Index(p2Index - 1);
+  };
+
+  const handleHome = () => { 
+    setCurrentScreen('HOME'); 
+    setP1Index(0); 
+    setP2Index(0); 
+    setExerciseTimer(1200);
+    setUserAnswers({});
+  };
+
+  const Header = () => (
+    <header className="h-20 bg-[#1D70B8] flex items-center justify-between px-6 border-b border-blue-800">
+      <div className="flex items-center space-x-4">
+        <div className="w-14 h-14 bg-white rounded-full flex items-center justify-center font-bold text-[#1D70B8] text-xl">iTEP</div>
+        <div>
+          <h1 className="text-white text-2xl font-bold tracking-wide">ITEP Essential Grammar</h1>
+          <p className="text-blue-100 text-sm">Essential Practice Module</p>
+        </div>
+      </div>
+      <div className="flex space-x-3 items-center">
+        <button onClick={handleHome} className="bg-white/10 hover:bg-white/20 p-2 rounded text-white"><Home size={20} /></button>
+        <button className="bg-gradient-to-b from-blue-500 to-blue-700 hover:from-blue-600 px-4 py-2 rounded text-white flex items-center space-x-2"><HelpCircle size={18} /><span>Help</span></button>
+      </div>
+    </header>
+  );
+
+  const Footer = () => (
+    <footer className="h-24 bg-[#1D70B8] flex items-center justify-between px-8 border-t border-blue-800">
+      <div className="flex space-x-12">
+        <div>
+          <div className="text-3xl font-extrabold text-white">
+            {currentScreen === 'P1' ? `${p1Index + 1}/15` : currentScreen === 'P2' ? `${p2Index + 1}/15` : '0/0'}
+          </div>
+          <div className="text-xs tracking-wider text-blue-200 uppercase">Question</div>
+        </div>
+        <div>
+          <div className="text-3xl font-extrabold text-white">
+            {Math.floor(exerciseTimer / 60).toString().padStart(2, '0')}:{(exerciseTimer % 60).toString().padStart(2, '0')}
+          </div>
+          <div className="text-xs tracking-wider text-blue-200 uppercase">Time Left</div>
+        </div>
+      </div>
+      <div className="flex space-x-4">
+        {['P1', 'P2'].includes(currentScreen) && (
+            <>
+                <button onClick={handleBack} disabled={ (currentScreen === 'P1' ? p1Index : p2Index) === 0 } className="px-8 py-3 bg-slate-300 text-slate-700 font-bold rounded shadow disabled:opacity-50">&lt; Back</button>
+                <button onClick={handleNext} className="px-8 py-3 bg-gradient-to-b from-blue-400 to-blue-600 text-white font-bold rounded shadow">Next &gt;</button>
+            </>
+        )}
+      </div>
+    </footer>
+  );
+
+  return (
+    <div className="flex flex-col h-screen w-screen bg-[#2A2A2A] overflow-hidden select-none font-sans">
+      <Header />
+      <main className="flex-grow relative overflow-y-auto bg-[#2D2D2D] p-10 text-white">
+        {currentScreen === 'HOME' && (
+          <div className="flex flex-col items-center justify-center h-full space-y-8">
+            <h2 className="text-3xl font-bold">Select a Module to Begin</h2>
+            <div className="grid grid-cols-2 gap-6 w-full max-w-2xl">
+              <button onClick={() => setCurrentScreen('DIRECTIONS_P1')} className="h-40 bg-white rounded-xl shadow-lg hover:shadow-2xl flex flex-col items-center justify-center space-y-2 border-4 border-[#1D70B8] transition text-black">
+                <BookOpen size={48} className="text-[#1D70B8]" />
+                <span className="font-bold text-lg">Grammar Part 1</span>
+              </button>
+              <button onClick={() => setCurrentScreen('DIRECTIONS_P2')} className="h-40 bg-white rounded-xl shadow-lg hover:shadow-2xl flex flex-col items-center justify-center space-y-2 border-4 border-[#1D70B8] transition text-black">
+                <BookOpen size={48} className="text-[#1D70B8]" />
+                <span className="font-bold text-lg">Grammar Part 2</span>
+              </button>
+            </div>
+          </div>
+        )}
+
+        {currentScreen === 'DIRECTIONS_P1' && (
+            <div className="flex flex-col items-center justify-center text-center space-y-6">
+                <h2 className="text-4xl font-bold">Grammar Part 1</h2>
+                <p className="max-w-xl text-lg">You have 15 questions. Choose the words that correctly complete the gaps in each sentence.</p>
+                <div className="text-3xl font-mono text-[#38BDF8] mt-10">
+                    {directionTimer > 0 ? `Please wait ${directionTimer}s` : <button onClick={() => setCurrentScreen('P1')} className="bg-[#1D70B8] px-8 py-3 rounded text-white shadow-lg">Start Part 1</button>}
+                </div>
+            </div>
+        )}
+
+        {currentScreen === 'P1' && (
+            <div className="max-w-4xl mx-auto space-y-6">
+                <div className="bg-black text-[#38BDF8] p-4 font-bold border-l-4 border-[#38BDF8]">Select the words that correctly complete the gaps.</div>
+                <p className="text-gray-200 text-2xl leading-relaxed">{QUESTIONS_P1[p1Index].text}</p>
+                <p className="text-sky-300 italic">Hint: {QUESTIONS_P1[p1Index].hint}</p>
+                <div className="grid grid-cols-1 gap-4">
+                    {QUESTIONS_P1[p1Index].options.map((opt) => (
+                        <button key={opt} disabled={userAnswers[`p1_${p1Index}`] !== undefined} onClick={() => setUserAnswers(prev => ({...prev, [`p1_${p1Index}`]: opt}))} className={`p-4 border border-gray-600 rounded text-left transition ${userAnswers[`p1_${p1Index}`] === opt ? 'bg-[#1D70B8] text-white' : 'hover:bg-gray-700'} ${userAnswers[`p1_${p1Index}`] ? 'cursor-not-allowed opacity-60' : ''}`}>{opt}</button>
+                    ))}
+                </div>
+                {userAnswers[`p1_${p1Index}`] && (
+                    <div className={`p-4 rounded ${userAnswers[`p1_${p1Index}`] === QUESTIONS_P1[p1Index].correct ? 'bg-green-900 border border-green-700' : 'bg-red-900 border border-red-700'}`}>
+                        <p className="font-bold">{userAnswers[`p1_${p1Index}`] === QUESTIONS_P1[p1Index].correct ? 'Correct!' : 'Incorrect'}</p>
+                        <p className="text-white">{QUESTIONS_P1[p1Index].explanation}</p>
+                    </div>
+                )}
+            </div>
+        )}
+
+        {currentScreen === 'DIRECTIONS_P2' && (
+            <div className="flex flex-col items-center justify-center text-center space-y-6">
+                <h2 className="text-4xl font-bold">Grammar Part 2</h2>
+                <p className="max-w-xl text-lg">You have 15 questions. Select the word or part that is WRONG in the given sentence.</p>
+                <div className="text-3xl font-mono text-[#38BDF8] mt-10">
+                    {directionTimer > 0 ? `Please wait ${directionTimer}s` : <button onClick={() => setCurrentScreen('P2')} className="bg-[#1D70B8] px-8 py-3 rounded text-white shadow-lg">Start Part 2</button>}
+                </div>
+            </div>
+        )}
+
+        {currentScreen === 'P2' && (
+            <div className="max-w-4xl mx-auto space-y-6">
+                <div className="bg-black text-[#38BDF8] p-4 font-bold border-l-4 border-[#38BDF8]">Select the word/phrase that is WRONG.</div>
+                <p className="text-gray-200 text-2xl leading-relaxed">{QUESTIONS_P2[p2Index].sentence}</p>
+                <p className="text-sky-300 italic">Hint: {QUESTIONS_P2[p2Index].hint}</p>
+                <div className="grid grid-cols-1 gap-4">
+                    {QUESTIONS_P2[p2Index].parts.map((p) => (
+                        <button key={p.id} disabled={userAnswers[`p2_${p2Index}`] !== undefined} onClick={() => setUserAnswers(prev => ({...prev, [`p2_${p2Index}`]: p.id}))} className={`p-4 border border-gray-600 rounded text-left transition ${userAnswers[`p2_${p2Index}`] === p.id ? 'bg-[#1D70B8] text-white' : 'hover:bg-gray-700'} ${userAnswers[`p2_${p2Index}`] ? 'cursor-not-allowed opacity-60' : ''}`}>{p.id.toUpperCase()}. {p.text}</button>
+                    ))}
+                </div>
+                {userAnswers[`p2_${p2Index}`] && (
+                    <div className={`p-4 rounded ${userAnswers[`p2_${p2Index}`] === QUESTIONS_P2[p2Index].correct ? 'bg-green-900 border border-green-700' : 'bg-red-900 border border-red-700'}`}>
+                        <p className="font-bold">{userAnswers[`p2_${p2Index}`] === QUESTIONS_P2[p2Index].correct ? 'Correct!' : 'Incorrect'}</p>
+                        <p className="text-white">{QUESTIONS_P2[p2Index].explanation}</p>
+                    </div>
+                )}
+            </div>
+        )}
+
+        {currentScreen === 'RESULT' && (
+            <div className="flex flex-col items-center justify-center h-full space-y-6">
+                <h2 className="text-4xl font-bold">Module Complete</h2>
+                {!savedName ? (
+                    <div className="flex flex-col space-y-4 w-64">
+                        <input onChange={(e) => setSavedName(e.target.value)} className="p-3 text-black rounded shadow" placeholder="Enter your name" />
+                        <button onClick={() => setSavedName(savedName || 'Participant')} className="bg-[#1D70B8] px-8 py-3 rounded text-white font-bold">Save Performance</button>
+                    </div>
+                ) : <p className="text-2xl">Great job, {savedName}! Your results have been saved.</p>}
+                <button onClick={handleHome} className="bg-gray-600 px-8 py-3 rounded text-white font-bold mt-4 hover:bg-gray-500">Back to Home</button>
+            </div>
+        )}
+      </main>
+      <Footer />
+    </div>
+  );
+}
